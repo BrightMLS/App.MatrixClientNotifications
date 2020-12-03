@@ -4,10 +4,10 @@ env:
   variables:
     DOTNET_FRAMEWORK: 4.6.2
     CONFIGURATION: Release
-    PROJECT_TO_BUILD: App.MatrixClientNotifications\BrightMls.Enterprise.MatrixClientNotifications\BrightMls.Enterprise.MatrixClientNotifications.csproj
+    PROJECT_TO_BUILD: App.MatrixClientNotifications\App.MatrixClientNotifications\App.MatrixClientNotifications.csproj
     ARTIFACTORY_URL: https://brightmls.jfrog.io/brightmls/api/nuget/bright-nuget-repo
     PROJECT_FOLDER: App.MatrixClientNotifications
-    PROJECT_SUB_FOLDER: BrightMls.Enterprise.MatrixClientNotifications
+    PROJECT_SUB_FOLDER: App.MatrixClientNotifications
   parameter-store:
     ARTIFACTORY_PASSWORD: /CodeBuild/ArtifactoryPassword
     NUGET_LOCATION: /CodeBuild/NugetExeLocation

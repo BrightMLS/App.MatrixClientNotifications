@@ -1,11 +1,11 @@
 version: 0.0
 os: windows
 files:
-  - source: BrightMls.Enterprise.MatrixClientNotifications
+  - source: App.MatrixClientNotifications
     destination: C:\BrightMls\MatrixClientNotifications
 hooks:
   AfterInstall:
-    - location: BrightMls.Enterprise.MatrixClientNotifications/DeployScripts/afterInstall.ps1
+    - location: App.MatrixClientNotifications/DeployScripts/afterInstall.ps1
       timeout: 300
       runas: administrator
       
