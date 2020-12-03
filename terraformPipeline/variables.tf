@@ -79,5 +79,5 @@ variable "site_secondary" {
 }
 
 variable "tier" {
-  default = "matrixclientnotificationsjob"
+  default = "clientnotificationsjob"
 }
