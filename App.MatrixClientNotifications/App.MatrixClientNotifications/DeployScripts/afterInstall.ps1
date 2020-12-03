@@ -9,7 +9,7 @@ $parameterStoreAppName = "clientnotifications"
 switch ( $env:DEPLOYMENT_GROUP_NAME )
 {
     "aue1d1z1cdg${deploymentGroupAppName}developdeploy" {
-        Rename-Item -path "$rootDir\app.dev.config" -NewName App.MatrixClientNotifications.exe -Force
+        #Rename-Item -path "$rootDir\app.dev.config" -NewName App.MatrixClientNotifications.exe -Force
         Get-SSMParameter -WithDecryption 1 -Name "/secure/aue1/d1/dotnetiis/${parameterStoreAppName}/connectionstrings" | Select -ExpandProperty Value | Out-File -FilePath "$rootDir\ConnectionStrings.config"
     }
     "auw2d1z1cdg${deploymentGroupAppName}developdeploy" {
