@@ -43,11 +43,36 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Agent.cs" />
+    <Compile Include="Models\Contact.cs" />
+    <Compile Include="Models\ContactPhone.cs" />
+    <Compile Include="Models\EmailInformation.cs" />
+    <Compile Include="Models\ListingNote.cs" />
+    <Compile Include="Models\MlsInformation.cs" />
+    <Compile Include="Models\PortalListing.cs" />
+    <Compile Include="Models\PortalListingData.cs" />
+    <Compile Include="PortalNotificationsDataManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="App.dev.config" />
+    <None Include="App.prod.config" />
+    <None Include="App.test.config" />
+    <None Include="appspec.yml" />
+    <None Include="buildspec.yml" />
+    <None Include="DeployScripts\afterInstall.ps1" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_Readme\Elmah.txt" />
+    <Content Include="HtmlTemplates\Email.html" />
+    <Content Include="HtmlTemplates\Listing.html" />
+    <Content Include="HtmlTemplates\Note.html" />
+    <Content Include="Lib\BrightMls.Enterprise.Email.dll" />
+    <Content Include="Lib\BrightMls.Enterprise.Mds.dll" />
+    <Content Include="Lib\SMTP.Net.dll" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,0 +1,55 @@
+﻿version: 0.2
+
+env:
+  variables:
+    DOTNET_FRAMEWORK: 4.6.2
+    CONFIGURATION: Release
+    PROJECT_TO_BUILD: App.MatrixClientNotifications\BrightMls.Enterprise.MatrixClientNotifications\BrightMls.Enterprise.MatrixClientNotifications.csproj
+    ARTIFACTORY_URL: https://brightmls.jfrog.io/brightmls/api/nuget/bright-nuget-repo
+    PROJECT_FOLDER: App.MatrixClientNotifications
+    PROJECT_SUB_FOLDER: BrightMls.Enterprise.MatrixClientNotifications
+  parameter-store:
+    ARTIFACTORY_PASSWORD: /CodeBuild/ArtifactoryPassword
+    NUGET_LOCATION: /CodeBuild/NugetExeLocation
+
+
+
+phases:
+  install:
+    commands:
+#     we are storing nuget in S3 because it's more current than what comes with this build image and we'll use it.
+      - aws s3 cp s3://$env:NUGET_S3/Tools/nuget.exe $env:CODEBUILD_SRC_DIR
+  pre_build:
+    commands:
+#     setup nuget so it will be able to connect to private repo
+      - '& "$env:CODEBUILD_SRC_DIR\NuGet.exe" sources Add -Name Artifactory -Source $env:ARTIFACTORY_URL -username codebuild-nuget -password $env:ARTIFACTORY_PASSWORD'
+      - '& "$env:CODEBUILD_SRC_DIR\NuGet.exe" setapikey codebuild-nuget:$env:ARTIFACTORY_PASSWORD -Source Artifactory -verbosity quiet'
+#     restore packages.  .NET framework via MSBuild doesn't restore automatically as far as I can tell
+      - '& "$env:CODEBUILD_SRC_DIR\NuGet.exe" restore $env:CODEBUILD_SRC_DIR\$env:PROJECT_TO_BUILD -PackagesDirectory $env:CODEBUILD_SRC_DIR\$env:PROJECT_FOLDER\packages'  
+  build:
+    commands:  
+#     build the project
+      - '& "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\MSBuild.exe" /p:Configuration=$env:CONFIGURATION -p:FrameworkPathOverride="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v$env:DOTNET_FRAMEWORK" $env:CODEBUILD_SRC_DIR\$env:PROJECT_TO_BUILD'
+  post_build:
+    commands:
+    # move appspec.yml to parent dir so artifact gets created correctly
+      - move $env:CODEBUILD_SRC_DIR\$env:PROJECT_FOLDER\$env:PROJECT_SUB_FOLDER\appspec.yml $env:CODEBUILD_SRC_DIR\$env:PROJECT_FOLDER
+      - move $env:CODEBUILD_SRC_DIR\$env:PROJECT_FOLDER\$env:PROJECT_SUB_FOLDER\app*.config $env:CODEBUILD_SRC_DIR\$env:PROJECT_FOLDER\$env:PROJECT_SUB_FOLDER\bin\Release
+artifacts:
+  files:
+      - 'codedeploy/**/*'
+      - 'dist/**/*'
+  secondary-artifacts:
+    codedeploy:
+      files:
+        - $env:PROJECT_SUB_FOLDER/app*.config
+        - $env:PROJECT_SUB_FOLDER/DeployScripts/*
+        - $env:PROJECT_SUB_FOLDER/bin/Release/**/*
+        - appspec.yml
+      base-directory: $env:CODEBUILD_SRC_DIR\$env:PROJECT_FOLDER\
+      name: codedeploy
+    build:
+      files:
+        - 'dist/**/*'
+        - 'build/**/*'
+      name: build
