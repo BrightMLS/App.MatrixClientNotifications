@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Quiksoft.EasyMail.SMTP;
 using EmailMessage = BrightMls.Enterprise.Email.EmailMessage;
 using ListingNote = BrightMls.Enterprise.MatrixClientNotifications.Models.ListingNote;
+using System.Net.Mail;
 
 namespace BrightMls.Enterprise.MatrixClientNotifications
 {
@@ -128,25 +129,44 @@ namespace BrightMls.Enterprise.MatrixClientNotifications
 
         private static void SendEmail(string emailBody, string emailSubject, string emailTo, string emailFrom, string fromName)
         {
-            var em = new EmailMessage(emailFrom);
-            var toAddress = new Address
-            {
-                Email = ConfigurationManager.AppSettings["PortalNotificationTestMode"] == "true"
+            //var em = new EmailMessage(emailFrom);
+            //var toAddress = new Address
+            //{
+            //    Email = ConfigurationManager.AppSettings["PortalNotificationTestMode"] == "true"
+            //        ? ConfigurationManager.AppSettings["PortalNotificationTestModeRecipients"]
+            //        : emailTo
+            //};
+
+            //if (toAddress.Email == null || toAddress.Email.Trim() == "") return;
+            //em.Recipients.Add(toAddress);
+
+            //em.From = new Address(emailFrom, fromName);
+
+            //em.Subject = emailSubject;
+
+            //em.BodyPartFormat = BodyPartFormat.HTML;
+            //em.Body = emailBody;
+
+            //em.Send();
+
+            var email = ConfigurationManager.AppSettings["PortalNotificationTestMode"] == "true"
                     ? ConfigurationManager.AppSettings["PortalNotificationTestModeRecipients"]
-                    : emailTo
+                    : emailTo;
+
+            var message = new MailMessage
+            {
+                Subject = emailSubject,
+                IsBodyHtml = true
             };
-            
-            if (toAddress.Email == null || toAddress.Email.Trim() == "") return;
-            em.Recipients.Add(toAddress);
 
-            em.From = new Address(emailFrom, fromName);
+            message.To.Add(email.Trim());
+            message.From = new MailAddress(ConfigurationManager.AppSettings["SMTPFrom"]);
+            message.Body = emailBody;
 
-            em.Subject = emailSubject;
+            var client = new SmtpClient { Host = ConfigurationManager.AppSettings["SMTPServer"] };
 
-            em.BodyPartFormat = BodyPartFormat.HTML;
-            em.Body = emailBody;
+            client.Send(message);
 
-            em.Send();
         }
 
         public static IList<EmailInformation> GetClientNoteEmails(string portalStatusJobCode)
@@ -161,7 +181,7 @@ namespace BrightMls.Enterprise.MatrixClientNotifications
                 else
                     sinceLastRun = Convert.ToDateTime(ConfigurationManager.AppSettings["PortalNotificationOnlySubscriberIDDate"]);
                 
-                var portalListings = MatrixClientPortalManager.GetClientPortalNotes(sinceLastRun.ToUniversalTime(), "LastAgentNoteTimestamp");
+                var portalListings = MatrixClientPortalManager.GetClientPortalNotes(sinceLastRun.ToLocalTime(), "LastAgentNoteTimestamp");
                 
                 // lists and dictionaries to store potentially repeated values so we can only query poor crappy MDS once
                 foreach (var portalListing in portalListings)
@@ -265,7 +285,7 @@ namespace BrightMls.Enterprise.MatrixClientNotifications
                                 if (mlsInfo.ListingKeyNumeric != uniqueMatrixId) continue;
 
                                 mlsInfo.Address = CommonUtils.FormatBrightAddress(property.LocationAddress);
-                                mlsInfo.MlsNumber = int.Parse(property.Listing.ListingId);
+                                mlsInfo.MlsNumber = property.Listing.ListingId;
                             }
                         }
                     }
