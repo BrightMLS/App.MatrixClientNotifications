@@ -316,30 +316,38 @@ namespace BrightMls.Enterprise.MatrixClientNotifications
                 var message = mdsClient.Query(query, "Agent");
                 var mdsResponse =
                     (BrightAgentsMdsResponse) JsonConvert.DeserializeObject(message, typeof(BrightAgentsMdsResponse));
-                if (mdsResponse.ResponseStatus.StatusCode != MdsEnums.StatusCode.Success ||
-                    mdsResponse.BrightAgents == null ||
-                    mdsResponse.BrightAgents.Agent.Count != 1) return null;
+                //if (mdsResponse.ResponseStatus.StatusCode != MdsEnums.StatusCode.Success ||
+                //    mdsResponse.BrightAgents == null ||
+                //    mdsResponse.BrightAgents.Agent.Count != 1) return null;
 
                 // limit the fields to only the ones we need.  we want to be nice to the poor performing MDS.  that poor puppy of crappy database
                 mdsClient.SearchOptions.SelectFields = new[] { "MemberPreferredFirstName", "MemberPreferredLastName", "MemberPreferredPhone", "MemberEmail", "MemberMlsId" };
-                var agentManager = new Mds.Managers.Agent(mdsClient);
-                mdsResponse = agentManager.GetAgents(new[] {mdsResponse.BrightAgents.Agent[0].ResourceKey});
-                if (mdsResponse.ResponseStatus.StatusCode != MdsEnums.StatusCode.Success ||
-                    mdsResponse.BrightAgents == null || mdsResponse.BrightAgents.Agent.Count < 1)
-                    return null;
+                //var agentManager = new Mds.Managers.Agent(mdsClient);
+                //mdsResponse = agentManager.GetAgents(new[] {mdsResponse.BrightAgents.Agent[0].ResourceKey});
+                //if (mdsResponse.ResponseStatus.StatusCode != MdsEnums.StatusCode.Success ||
+                //    mdsResponse.BrightAgents == null || mdsResponse.BrightAgents.Agent.Count < 1)
+                //    return null;
 
                 foreach (var agent in mdsResponse.BrightAgents.Agent)
                 {
+                    var agentManager = new Mds.Managers.Agent(mdsClient);
+                    var agentResponse = agentManager.GetAgents(new[] {agent.ResourceKey});
+
                     // find all emailInformationList entries for this agent
-                    var agentInfos = emailInformationList.FindAll(a => a.AgentMemberMlsId == agent.BrightAgent.MemberMlsId);
+                    //var agentInfos = emailInformationList.FindAll(a => a.AgentMemberMlsId == agent.BrightAgent.MemberMlsId);
+                    var agentInfos = emailInformationList.FindAll(a => a.AgentMemberMlsId == agentResponse.BrightAgents.Agent[0].BrightAgent.MemberMlsId);
                     foreach (var agentInfo in agentInfos)
                     {
                         agentInfo.Agent = new Models.Agent
                         {
-                            Email = agent.BrightAgent.MemberEmail,
-                            PreferredFirstName = agent.BrightAgent.MemberPreferredFirstName,
-                            PreferredLastName = agent.BrightAgent.MemberPreferredLastName,
-                            PreferredPhoneNumber = agent.BrightAgent.MemberPreferredPhone,
+                            //Email = agent.BrightAgent.MemberEmail,
+                            //PreferredFirstName = agent.BrightAgent.MemberPreferredFirstName,
+                            //PreferredLastName = agent.BrightAgent.MemberPreferredLastName,
+                            //PreferredPhoneNumber = agent.BrightAgent.MemberPreferredPhone,
+                            Email = agentResponse.BrightAgents.Agent[0].BrightAgent.MemberEmail,
+                            PreferredFirstName = agentResponse.BrightAgents.Agent[0].BrightAgent.MemberPreferredFirstName,
+                            PreferredLastName = agentResponse.BrightAgents.Agent[0].BrightAgent.MemberPreferredLastName,
+                            PreferredPhoneNumber = agentResponse.BrightAgents.Agent[0].BrightAgent.MemberPreferredPhone,
                         };
                     }
                 }
